@@ -13,7 +13,7 @@
 // create oscillator from BaseAudioContext class, guess it's inherited 
 // createOscillator creates an OscillatorNode 
 // so the start method, etc are from there 
-// -- I copied marcgg's note chart onto a json file 
+ 
 // http://www.techlib.com/reference/musical_note_frequencies.htm#:~:text=Starting%20at%20any%20note%20the,be%20positive%2C%20negative%20or%20zero.
 // there is also a formula for notes, freq = note x 2^(N/12) where note is base note and N is number of notes away 
 
@@ -81,13 +81,9 @@ stopSound.addEventListener('click', () => {
 })
 
 // function to play a short sound, with processing for duration, note (Oct-Not), wave type 
-function playNote(noteCode, ms, wType) {
+function playNote(noteCode, ms = 1000, wType = 'triangle') {
   // initialize variables 
   const finalMs = 40
-
-  // 2 optional arguments 
-  if (!ms) ms = 1000 
-  if (!wType) wType = 'sine'
 
   // create gain and oscillator 
   const w = context.createOscillator()
@@ -103,6 +99,21 @@ function playNote(noteCode, ms, wType) {
   // start the note 
   w.start()
 
+  // find the note in the notes object 
+  // 1) parse the input 
+  // 2) try to access that value 
+  // 3) if found, play note at that frequency, if not found, play a default note 
+  const [oct, not] = noteCode.split('-')
+  try {
+    if (notes[oct][not]) {
+      w.frequency.setValueAtTime(notes[oct][not], context.currentTime)
+    }
+
+  } catch (er) {
+    console.log('playNote: Note code not found!')
+    console.log(er)
+  }
+
   // we start stopping the wave after ms milliseconds
   // then we finally stop the wave with .stop 2*finalMs ms after that 
   setTimeout(() => {
@@ -116,4 +127,37 @@ function playNote(noteCode, ms, wType) {
 
 
 // iteratively create 0-7 octaves and all 12 notes 
+// keyboard type of thing 
+// classname keyboardRow, keyboardKey 
+// append these to id="keyboards"
+const keyboards = document.querySelector('#keyboards')
+
+for (let i = 0; i <= 7; i++) {
+  const keyboardOctave = document.createElement('div')
+  keyboardOctave.setAttribute('class', 'keyboardRow')
+
+  keyboardOctave.append(`Octave ${i}: `)
+
+  // in each octave make a key for each note 
+  notesOctave.forEach((n, ind) => {
+    const key = document.createElement('div')
+    key.setAttribute('class', 'keyboardKey')
+    key.innerText = `${n}`
+
+    // assemble the key's noteCode 
+    const keyCode = `${i.toString()}-${n}`
+    
+    key.addEventListener('click', () => playNote(keyCode, 300, 'triangle'))
+
+    // make the note black if it has a sharp (#) 
+    if (n.includes('#')) {
+      key.style.backgroundColor = 'black'
+      key.style.color = 'white'
+    }
+
+    keyboardOctave.append(key)
+  })
+    
+  keyboards.append(keyboardOctave)
+}
 

@@ -1,0 +1,16 @@
+#keyboards {
+  border: 1px solid black;
+  margin: 20px;
+  padding: 20px;
+}
+
+.keyboardRow {
+  display: flex;
+  margin: 20px 0;
+}
+
+.keyboardKey {
+  width: 40px;
+  height: 120px;
+  border: 1px solid black;
+}
